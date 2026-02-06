@@ -1,0 +1,84 @@
+apisix:
+  node_listen: 9080
+  enable_ipv6: false
+  
+  enable_control: true
+  control:
+    ip: "0.0.0.0"
+    port: 9092
+
+deployment:
+  role: traditional
+  role_traditional:
+    config_provider: etcd
+  
+  admin:
+    admin_key:
+      - name: "admin"
+        key: vllm-platform-admin-key-2026
+        role: admin
+    
+    enable_admin_cors: true
+    allow_admin:
+      - 0.0.0.0/0
+    
+    admin_listen:
+      ip: 0.0.0.0
+      port: 9180
+  
+  etcd:
+    host:
+      - "http://etcd:2379"
+    prefix: "/apisix"
+    timeout: 30
+
+nginx_config:
+  error_log: "/dev/stderr"
+  error_log_level: "info"
+  
+  http:
+    enable_access_log: true
+    access_log: "/dev/stdout"
+    access_log_format: '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $request_time'
+    
+plugin_attr:
+  prometheus:
+    export_addr:
+      ip: "0.0.0.0"
+      port: 9091
+    enable_export_server: true
+    export_uri: /apisix/prometheus/metrics
+    metric_prefix: apisix_
+
+plugins:
+  - key-auth
+  - serverless-pre-function
+  - serverless-post-function
+  - proxy-rewrite
+  - proxy-cache
+  - prometheus
+  - response-rewrite
+  - redirect
+  - request-id
+  - cors
+  - ip-restriction
+  - consumer-restriction
+  - jwt-auth
+  - request-validation
+  - api-breaker
+  - grpc-transcode
+  - grpc-web
+  - http-logger
+  - echo
+  - loggly
+  - syslog
+  - error-log-logger
+  - tcp-logger
+  - kafka-logger
+  - datadog
+  - zipkin
+  - skywalking
+  - opentelemetry
+  - ext-plugin-pre-req
+  - ext-plugin-post-req
+  - ext-plugin-post-resp
